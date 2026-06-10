@@ -7,7 +7,6 @@ import service.UserService;
 
 public class Main {
     public static void main(String[] args) {
-        // Inicializando as camadas do sistema (A ponte completa!)
         UserRepository repository = new UserRepository();
         UserService service = new UserService(repository);
         UserController controller = new UserController(service);
@@ -27,20 +26,17 @@ public class Main {
                 System.out.print("Digite o email do usuário: ");
                 String email = scanner.nextLine();
 
-                // Agora usamos o Controller no lugar do Service!
                 controller.adicionarUsuario(nome, email);
                 System.out.println("Usuário adicionado com sucesso!\n");
             }
 
             System.out.println("\n--- Usuários Registrados ---");
             
-            // O Controller quem lista agora
             List<User> todosUsuarios = controller.listarUsuarios();
 
             for (User u : todosUsuarios) {
                 System.out.println(u);
             }
-            
         } 
     }
 }
