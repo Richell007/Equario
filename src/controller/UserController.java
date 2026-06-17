@@ -1,5 +1,6 @@
 package controller;
 
+import exceptions.ArquivoException;
 import exceptions.LoginInvalidoException;
 import exceptions.SenhaInvalidaException;
 import java.util.List;
@@ -13,7 +14,8 @@ public class UserController {
         this.service = service;
     }
 
-    public void adicionarUsuario(String nome, String email, String login, String senha) throws LoginInvalidoException, SenhaInvalidaException {
+    public void adicionarUsuario(String nome, String email, String login, String senha)
+            throws LoginInvalidoException, SenhaInvalidaException, ArquivoException {
         service.adicionarUsuario(nome, email, login, senha);
     }
 
