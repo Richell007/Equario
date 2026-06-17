@@ -1,4 +1,5 @@
 import controller.UserController;
+import exceptions.ArquivoException;
 import exceptions.LoginInvalidoException;
 import exceptions.SenhaInvalidaException;
 import java.util.List;
@@ -9,7 +10,14 @@ import service.UserService;
 
 public class Main {
     public static void main(String[] args) {
-        UserRepository repository = new UserRepository();
+        UserRepository repository;
+        try {
+            repository = new UserRepository();
+        } catch (ArquivoException e) {
+            System.out.println("ERRO FATAL ao carregar dados: " + e.getMessage());
+            return;
+        }
+
         UserService service = new UserService(repository);
         UserController controller = new UserController(service);
 
@@ -20,9 +28,7 @@ public class Main {
                 System.out.print("Digite o nome do usuário (ou 'sair' para parar): ");
                 String nome = scanner.nextLine();
 
-                if (nome.equalsIgnoreCase("sair")) {
-                    break;
-                }
+                if (nome.equalsIgnoreCase("sair")) break;
 
                 System.out.print("Digite o email do usuário: ");
                 String email = scanner.nextLine();
@@ -38,6 +44,8 @@ public class Main {
                     System.out.println("Usuário adicionado com sucesso!\n");
                 } catch (LoginInvalidoException | SenhaInvalidaException e) {
                     System.out.println("ERRO: " + e.getMessage() + "\n");
+                } catch (ArquivoException e) {
+                    System.out.println("ERRO ao salvar no arquivo: " + e.getMessage() + "\n");
                 }
             }
 

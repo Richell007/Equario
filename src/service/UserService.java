@@ -1,5 +1,6 @@
 package service;
 
+import exceptions.ArquivoException;
 import exceptions.LoginInvalidoException;
 import exceptions.SenhaInvalidaException;
 import java.util.List;
@@ -13,10 +14,10 @@ public class UserService {
         this.repositorio = repositorio;
     }
 
-    public void adicionarUsuario(String nome, String email, String login, String senha) throws LoginInvalidoException, SenhaInvalidaException {
+    public void adicionarUsuario(String nome, String email, String login, String senha)
+            throws LoginInvalidoException, SenhaInvalidaException, ArquivoException {
         validarLogin(login);
         validarSenha(senha, nome, email);
-
         int id = repositorio.gerarProximoId();
         User novo = new User(id, nome, email, login, senha);
         repositorio.salvar(novo);
