@@ -1,0 +1,21 @@
+# Pastas de build e compilação
+/bin/
+/target/
+/dist/
+/out/
+
+# Arquivos compilados
+*.class
+*.jar
+*.war
+
+# Pastas de IDEs e configurações do sistema
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+.DS_Store
+
+# Logs
+*.log
