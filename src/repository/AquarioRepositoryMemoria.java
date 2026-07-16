@@ -1,0 +1,28 @@
+package repository;
+
+import model.Aquario;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class AquarioRepositoryMemoria implements IAquarioRepository {
+    private final List<Aquario> aquarios = new ArrayList<>();
+    private int proximoId = 1;
+
+    @Override
+    public void salvar(Aquario aquario) {
+        aquarios.add(aquario);
+        proximoId++;
+    }
+
+    @Override
+    public List<Aquario> listarTodos() {
+        return Collections.unmodifiableList(aquarios);
+    }
+
+    @Override
+    public int gerarProximoId() {
+        return proximoId;
+    }
+}

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class UserRepository {
+public class UserRepository implements IUserRepository {
     private static final String ARQUIVO = "usuarios.dat";
     private List<User> usuarios;
     private int proximoId;
