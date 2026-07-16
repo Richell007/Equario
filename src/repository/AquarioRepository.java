@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AquarioRepository {
+public class AquarioRepository implements IAquarioRepository {
     private static final String ARQUIVO = "aquarios.dat";
     private List<Aquario> aquarios;
     private int proximoId;

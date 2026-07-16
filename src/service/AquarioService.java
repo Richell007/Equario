@@ -5,12 +5,12 @@ import java.util.List;
 import model.Aquario;
 import model.TipoAquario;
 import model.User;
-import repository.AquarioRepository;
+import repository.IAquarioRepository;
 
 public class AquarioService {
-    private final AquarioRepository repositorio;
+    private final IAquarioRepository repositorio;
 
-    public AquarioService(AquarioRepository repositorio) {
+    public AquarioService(IAquarioRepository repositorio) {
         this.repositorio = repositorio;
     }
 
