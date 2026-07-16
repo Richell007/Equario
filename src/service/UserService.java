@@ -5,12 +5,12 @@ import exceptions.LoginInvalidoException;
 import exceptions.SenhaInvalidaException;
 import java.util.List;
 import model.User;
-import repository.UserRepository;
+import repository.IUserRepository;
 
 public class UserService {
-    private final UserRepository repositorio;
+    private final IUserRepository repositorio;
 
-    public UserService(UserRepository repositorio) {
+    public UserService(IUserRepository repositorio) {
         this.repositorio = repositorio;
     }
 

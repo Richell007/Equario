@@ -6,8 +6,10 @@ import exceptions.SenhaInvalidaException;
 import model.Aquario;
 import model.TipoAquario;
 import model.User;
-import repository.AquarioRepository;
-import repository.UserRepository;
+import repository.IAquarioRepository;
+import repository.IUserRepository;
+import repository.RepositoryFactory;
+import repository.TipoPersistencia;
 import service.AquarioService;
 import service.UserService;
 
@@ -19,10 +21,10 @@ public class FacadeSingletonController {
     private UserController userController;
     private AquarioController aquarioController;
 
-    private FacadeSingletonController() {
+    private FacadeSingletonController(TipoPersistencia tipoPersistencia) {
         try {
-            UserRepository userRepo = new UserRepository();
-            AquarioRepository aquarioRepo = new AquarioRepository();
+            IUserRepository userRepo = RepositoryFactory.criarUserRepository(tipoPersistencia);
+            IAquarioRepository aquarioRepo = RepositoryFactory.criarAquarioRepository(tipoPersistencia);
 
             UserService userService = new UserService(userRepo);
             AquarioService aquarioService = new AquarioService(aquarioRepo);
@@ -30,14 +32,21 @@ public class FacadeSingletonController {
             userController = new UserController(userService);
             aquarioController = new AquarioController(aquarioService);
         } catch (ArquivoException e) {
-
             throw new RuntimeException("Falha ao inicializar repositórios: " + e.getMessage(), e);
         }
     }
 
+    public static synchronized FacadeSingletonController getInstance(TipoPersistencia tipoPersistencia) {
+        if (instance == null) {
+            instance = new FacadeSingletonController(tipoPersistencia);
+        }
+        return instance;
+    }
+
     public static synchronized FacadeSingletonController getInstance() {
         if (instance == null) {
-            instance = new FacadeSingletonController();
+            throw new IllegalStateException(
+                "Facade ainda não foi inicializada. Use getInstance(TipoPersistencia) na primeira chamada.");
         }
         return instance;
     }

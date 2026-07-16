@@ -3,22 +3,30 @@ import exceptions.LoginInvalidoException;
 import exceptions.SenhaInvalidaException;
 import model.Aquario;
 import model.User;
+import repository.TipoPersistencia;
+
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        TipoPersistencia tipoPersistencia = escolherTipoPersistencia(scanner);
+
         FacadeSingletonController fachada;
         try {
-            fachada = FacadeSingletonController.getInstance();
+            fachada = FacadeSingletonController.getInstance(tipoPersistencia);
         } catch (RuntimeException e) {
             System.out.println("ERRO FATAL: " + e.getMessage());
+            scanner.close();
             return;
         }
 
         System.out.println("--- Sistema de Registro (Usuários e Aquários) ---");
+        System.out.println("Modo de persistência ativo: " + tipoPersistencia);
 
-        try (Scanner scanner = new Scanner(System.in)) {
+        try {
             boolean executando = true;
             while (executando) {
                 System.out.println("\n===== MENU =====");
@@ -55,6 +63,28 @@ public class Main {
                     default:
                         System.out.println("Opção inválida! Tente novamente.");
                 }
+            }
+        } finally {
+            scanner.close();
+        }
+    }
+
+    private static TipoPersistencia escolherTipoPersistencia(Scanner scanner) {
+        System.out.println("--- Configuração de Persistência ---");
+        while (true) {
+            System.out.println("1 - Arquivo binário (dados salvos em disco)");
+            System.out.println("2 - Memória RAM (dados perdidos ao encerrar)");
+            System.out.print("Escolha o tipo de persistência: ");
+
+            String opcao = scanner.nextLine();
+
+            switch (opcao) {
+                case "1":
+                    return TipoPersistencia.ARQUIVO;
+                case "2":
+                    return TipoPersistencia.MEMORIA;
+                default:
+                    System.out.println("Opção inválida! Digite 1 ou 2.\n");
             }
         }
     }
