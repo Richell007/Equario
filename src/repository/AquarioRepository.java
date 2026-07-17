@@ -1,12 +1,11 @@
 package repository;
 
 import exceptions.ArquivoException;
-import model.Aquario;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import model.Aquario;
 
 public class AquarioRepository implements IAquarioRepository {
     private static final String ARQUIVO = "aquarios.dat";

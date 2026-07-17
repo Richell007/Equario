@@ -1,12 +1,11 @@
 package repository;
 
 import exceptions.ArquivoException;
-import model.User;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import model.User;
 
 public class UserRepository implements IUserRepository {
     private static final String ARQUIVO = "usuarios.dat";
