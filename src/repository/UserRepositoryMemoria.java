@@ -1,10 +1,9 @@
 package repository;
 
-import model.User;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import model.User;
 
 public class UserRepositoryMemoria implements IUserRepository {
     private final List<User> usuarios = new ArrayList<>();
