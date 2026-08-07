@@ -34,8 +34,10 @@ public class Main {
                 System.out.println("2 - Listar usuários");
                 System.out.println("3 - Adicionar aquário");
                 System.out.println("4 - Listar aquários");
-                System.out.println("5 - Mostrar quantidades");
-                System.out.println("6 - Sair");
+                System.out.println("5 - Atualizar aquário");
+                System.out.println("6 - Mostrar quantidades");
+                System.out.println("7 - Desfazer última atualização de aquário");
+                System.out.println("8 - Sair");
                 System.out.print("Escolha uma opção: ");
 
                 String opcao = scanner.nextLine();
@@ -54,9 +56,15 @@ public class Main {
                         listarAquarios(fachada);
                         break;
                     case "5":
-                        mostrarQuantidades(fachada);
+                        atualizarAquario(scanner, fachada);
                         break;
                     case "6":
+                        mostrarQuantidades(fachada);
+                        break;
+                    case "7":
+                        desfazerAtualizacaoAquario(fachada);
+                        break;
+                    case "8":
                         executando = false;
                         System.out.println("Encerrando o sistema...");
                         break;
@@ -173,6 +181,60 @@ public class Main {
             for (Aquario a : todosAquarios) {
                 System.out.println(a);
             }
+        }
+    }
+
+    private static void atualizarAquario(Scanner scanner, FacadeSingletonController fachada) {
+        List<Aquario> aquarios = fachada.listarAquarios();
+        if (aquarios.isEmpty()) {
+            System.out.println("Não há aquários cadastrados. Cadastre um aquário primeiro.");
+            return;
+        }
+
+        System.out.println("\nAquários disponíveis:");
+        for (Aquario a : aquarios) {
+            System.out.println(a);
+        }
+        System.out.print("Digite o ID do aquário que deseja atualizar: ");
+        int id;
+        try {
+            id = Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("ID inválido.");
+            return;
+        }
+
+        System.out.print("Digite o novo nome do aquário: ");
+        String nome = scanner.nextLine();
+        System.out.print("Digite o novo volume (em litros): ");
+        double volume;
+        try {
+            volume = Double.parseDouble(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Volume inválido.");
+            return;
+        }
+        System.out.print("Escolha o novo tipo (DOCE, SALOBRO, MARINHO): ");
+        String tipoStr = scanner.nextLine();
+
+        try {
+            fachada.atualizarAquario(id, nome, volume, tipoStr);
+            System.out.println("Aquário atualizado com sucesso!");
+        } catch (ArquivoException e) {
+            System.out.println("ERRO ao salvar no arquivo: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("ERRO: " + e.getMessage());
+        }
+    }
+
+    private static void desfazerAtualizacaoAquario(FacadeSingletonController fachada) {
+        try {
+            fachada.desfazerUltimaAtualizacaoAquario();
+            System.out.println("Última atualização de aquário desfeita com sucesso!");
+        } catch (ArquivoException e) {
+            System.out.println("ERRO ao salvar no arquivo: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            System.out.println("ERRO: " + e.getMessage());
         }
     }
 

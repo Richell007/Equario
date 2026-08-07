@@ -31,6 +31,28 @@ public class AquarioRepository implements IAquarioRepository {
         proximoId++;
     }
 
+    public void atualizar(Aquario aquario) throws ArquivoException {
+        int index = -1;
+        for (int i = 0; i < aquarios.size(); i++) {
+            if (aquarios.get(i).getId() == aquario.getId()) {
+                index = i;
+                break;
+            }
+        }
+        if (index == -1) {
+            throw new IllegalArgumentException("Aquário com ID " + aquario.getId() + " não encontrado.");
+        }
+
+        Aquario anterior = aquarios.get(index);
+        aquarios.set(index, aquario);
+        try {
+            salvarNoArquivo();
+        } catch (ArquivoException e) {
+            aquarios.set(index, anterior); // rollback
+            throw e;
+        }
+    }
+    
     public List<Aquario> listarTodos() {
         return Collections.unmodifiableList(aquarios);
     }
