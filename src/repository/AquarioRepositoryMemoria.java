@@ -16,6 +16,17 @@ public class AquarioRepositoryMemoria implements IAquarioRepository {
     }
 
     @Override
+    public void atualizar(Aquario aquario) {
+        for (int i = 0; i < aquarios.size(); i++) {
+            if (aquarios.get(i).getId() == aquario.getId()) {
+                aquarios.set(i, aquario);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Aquário com ID " + aquario.getId() + " não encontrado.");
+    }
+
+    @Override
     public List<Aquario> listarTodos() {
         return Collections.unmodifiableList(aquarios);
     }

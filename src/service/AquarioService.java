@@ -2,6 +2,8 @@ package service;
 
 import exceptions.ArquivoException;
 import java.util.List;
+import memento.AquarioCaretaker;
+import memento.AquarioMemento;
 import model.Aquario;
 import model.AquarioBuilder;
 import model.TipoAquario;
@@ -10,6 +12,7 @@ import repository.IAquarioRepository;
 
 public class AquarioService implements IAquarioService {
     private final IAquarioRepository repositorio;
+    private final AquarioCaretaker caretaker = new AquarioCaretaker();
 
     public AquarioService(IAquarioRepository repositorio) {
         this.repositorio = repositorio;
@@ -23,7 +26,7 @@ public class AquarioService implements IAquarioService {
         validarDono(dono);
 
         int id = repositorio.gerarProximoId();
-        
+
         Aquario novo = new AquarioBuilder()
                 .comId(id)
                 .comNome(nome)
@@ -31,8 +34,43 @@ public class AquarioService implements IAquarioService {
                 .comTipo(tipo)
                 .comDono(dono)
                 .build();
-                
+
         repositorio.salvar(novo);
+    }
+
+    @Override
+    public void atualizarAquario(int id, String nome, double volume, TipoAquario tipo) throws ArquivoException {
+        validarNome(nome);
+        validarVolume(volume);
+        validarTipo(tipo);
+
+        Aquario existente = repositorio.listarTodos().stream()
+                .filter(a -> a.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Aquário com ID " + id + " não encontrado."));
+
+        caretaker.salvar(new AquarioMemento(existente));
+
+        Aquario atualizado = new AquarioBuilder()
+                .comId(existente.getId())
+                .comNome(nome)
+                .comVolume(volume)
+                .comTipo(tipo)
+                .comDono(existente.getDono())
+                .build();
+
+        repositorio.atualizar(atualizado);
+    }
+
+    @Override
+    public void desfazerUltimaAtualizacaoAquario() throws ArquivoException {
+        if (!caretaker.possuiMemento()) {
+            throw new IllegalStateException("Não há atualização de aquário para desfazer.");
+        }
+
+        Aquario estadoAnterior = caretaker.recuperar().getEstado();
+        repositorio.atualizar(estadoAnterior);
+        caretaker.limpar();
     }
 
     private void validarNome(String nome) {
