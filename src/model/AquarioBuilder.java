@@ -1,24 +1,29 @@
 package model;
 
-public class Aquario {
+public class AquarioBuilder {
     private String nome;
     private int volume;
     private char tipoAgua;
 
-    private Aquario(String nome, int volume, char tipoAgua) {
+    public AquarioBuilder comNome(String nome) {
         this.nome = nome;
+        return this;
+    }
+
+    public AquarioBuilder comVolume(int volume) {
         this.volume = volume;
+        return this;
+    }
+
+    public AquarioBuilder comTipoAgua(char tipoAgua) {
         this.tipoAgua = tipoAgua;
+        return this;
     }
 
-    protected Aquario(AquarioBuilder construtor) {
-        this.nome = construtor.getNome();
-        this.volume = construtor.getVolume();
-        this.tipoAgua = construtor.getTipoAgua();
-    
+    public Aquario build() {
+        return new Aquario(this);
     }
 
-    
     public String getNome() {
         return nome;
     }
@@ -30,5 +35,4 @@ public class Aquario {
     public char getTipoAgua() {
         return tipoAgua;
     }
-    
 }
