@@ -35,7 +35,8 @@ package model {
         + toString(): String
     }
 
-    class AquarioBuilder {
+    ' === PADRÃO BUILDER (Dourado) ===
+    class AquarioBuilder #FFD700 {
         - id: int
         - nome: String
         - volume: double
@@ -68,13 +69,14 @@ package model {
     Aquario --> TipoAquario
 }
 
+' === PADRÃO MEMENTO (Laranja Escuro) ===
 package memento {
-    class AquarioMemento {
+    class AquarioMemento #FF8C00 {
         - estado: Aquario
         + getEstado(): Aquario
     }
 
-    class AquarioCaretaker {
+    class AquarioCaretaker #FF8C00 {
         - ultimoMemento: AquarioMemento
         + salvar(memento: AquarioMemento): void
         + recuperar(): AquarioMemento
@@ -100,14 +102,15 @@ package exceptions {
     }
 }
 
+' === PADRÃO ADAPTER (Violeta) ===
 package log {
-    interface Logger {
+    interface Logger #8A2BE2 {
         + info(mensagem: String): void
         + erro(mensagem: String): void
         + erro(mensagem: String, causa: Throwable): void
     }
 
-    class JulLoggerAdapter {
+    class JulLoggerAdapter #8A2BE2 {
         - julLogger: java.util.logging.Logger
         + JulLoggerAdapter(nome: String)
         + info(mensagem: String): void
@@ -122,6 +125,7 @@ package log {
     JulLoggerAdapter o--> JULLogger : julLogger
 }
 
+' === PADRÃO FACTORY METHOD (Verde Lima) ===
 package repository {
     enum TipoPersistencia {
         ARQUIVO
@@ -183,7 +187,7 @@ package repository {
         + gerarProximoId(): int
     }
 
-    class RepositoryFactory {
+    class RepositoryFactory #32CD32 {
         + {static} criarUserRepository(tipo: TipoPersistencia): IUserRepository
         + {static} criarAquarioRepository(tipo: TipoPersistencia): IAquarioRepository
     }
@@ -204,6 +208,7 @@ package repository {
     UserRepository ..> exceptions.ArquivoException : throws
 }
 
+' === PADRÃO PROXY (Vermelho Tomate) ===
 package service {
     interface IAquarioService {
         + adicionarAquario(nome: String, volume: double, tipo: TipoAquario, dono: User): void throws ArquivoException
@@ -220,7 +225,7 @@ package service {
         - validarDono(dono: User) : void
     }
 
-    class AquarioServiceProxy {
+    class AquarioServiceProxy #FF6347 {
         - servicoReal : IAquarioService
         - registroDeAtividades : Logger
         + AquarioServiceProxy(servicoReal: IAquarioService, registroDeAtividades: Logger)
@@ -308,12 +313,13 @@ package controller {
     UserController ..> exceptions.ArquivoException : throws
 }
 
+' === PADRÃO COMMAND (Azul Dodger) ===
 package command {
-    interface "Command<T>" as Command {
+    interface "Command<T>" as Command #1E90FF {
         + execute() : T throws Exception
     }
 
-    class AdicionarAquarioCommand {
+    class AdicionarAquarioCommand #1E90FF {
         - userController : UserController
         - aquarioController : AquarioController
         - nome : String
@@ -324,7 +330,7 @@ package command {
         + execute() : Void
     }
 
-    class AdicionarUsuarioCommand {
+    class AdicionarUsuarioCommand #1E90FF {
         - userController : UserController
         - nome : String
         - email : String
@@ -334,7 +340,7 @@ package command {
         + execute() : Void
     }
 
-    class AtualizarAquarioCommand {
+    class AtualizarAquarioCommand #1E90FF {
         - aquarioController : AquarioController
         - id : int
         - nome : String
@@ -344,19 +350,19 @@ package command {
         + execute() : Void
     }
 
-    class DesfazerAtualizacaoAquarioCommand {
+    class DesfazerAtualizacaoAquarioCommand #1E90FF {
         - aquarioController : AquarioController
         + DesfazerAtualizacaoAquarioCommand(aquarioController: AquarioController)
         + execute() : Void
     }
 
-    class ListarAquariosCommand {
+    class ListarAquariosCommand #1E90FF {
         - aquarioController : AquarioController
         + ListarAquariosCommand(aquarioController: AquarioController)
         + execute() : List<model.Aquario>
     }
 
-    class ListarUsuariosCommand {
+    class ListarUsuariosCommand #1E90FF {
         - userController : UserController
         + ListarUsuariosCommand(userController: UserController)
         + execute() : List<model.User>
@@ -387,8 +393,9 @@ package command {
     ListarUsuariosCommand ..> model.User : <<retorna>>
 }
 
+' === PADRÃO FACADE + SINGLETON (Rosa Profundo) ===
 package facade {
-    class FacadeSingletonController {
+    class FacadeSingletonController #FF1493 {
         - {static} instance : FacadeSingletonController
         - userController : UserController
         - aquarioController : AquarioController
