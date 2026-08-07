@@ -1,10 +1,14 @@
+import command.AdicionarAquarioCommand;
+import command.AdicionarUsuarioCommand;
+import command.Command;
+import command.ListarAquariosCommand;
+import command.ListarUsuariosCommand;
 import controller.AquarioController;
 import controller.UserController;
 import exceptions.ArquivoException;
 import exceptions.LoginInvalidoException;
 import exceptions.SenhaInvalidaException;
 import model.Aquario;
-import model.TipoAquario;
 import model.User;
 import repository.IAquarioRepository;
 import repository.IUserRepository;
@@ -51,43 +55,64 @@ public class FacadeSingletonController {
         return instance;
     }
 
+    /**
+     * Invoker: executa um Command e propaga apenas as exceções de negócio
+     * conhecidas pela fachada; qualquer outra falha inesperada é encapsulada.
+     */
+    private <T> T executar(Command<T> command)
+            throws LoginInvalidoException, SenhaInvalidaException, ArquivoException {
+        try {
+            return command.execute();
+        } catch (LoginInvalidoException | SenhaInvalidaException | ArquivoException | IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao executar comando: " + e.getMessage(), e);
+        }
+    }
+
     public void adicionarUsuario(String nome, String email, String login, String senha)
             throws LoginInvalidoException, SenhaInvalidaException, ArquivoException {
-        userController.adicionarUsuario(nome, email, login, senha);
+        Command<Void> comando = new AdicionarUsuarioCommand(userController, nome, email, login, senha);
+        executar(comando);
     }
 
     public List<User> listarUsuarios() {
-        return userController.listarUsuarios();
+        Command<List<User>> comando = new ListarUsuariosCommand(userController);
+        try {
+            return executar(comando);
+        } catch (LoginInvalidoException | SenhaInvalidaException | ArquivoException e) {
+            // ListarUsuariosCommand não lança exceções checadas; não deve ocorrer aqui.
+            throw new RuntimeException(e);
+        }
     }
 
     public void adicionarAquario(String nome, double volume, String tipoStr, int idDono)
             throws ArquivoException, IllegalArgumentException {
-
-        TipoAquario tipo;
+        Command<Void> comando = new AdicionarAquarioCommand(userController, aquarioController,
+                nome, volume, tipoStr, idDono);
         try {
-            tipo = TipoAquario.valueOf(tipoStr.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Tipo de aquário inválido. Use DOCE, SALOBRO ou MARINHO.");
+            executar(comando);
+        } catch (LoginInvalidoException | SenhaInvalidaException e) {
+            // AdicionarAquarioCommand não lança essas exceções; não deve ocorrer aqui.
+            throw new RuntimeException(e);
         }
-
-        User dono = userController.listarUsuarios().stream()
-                .filter(u -> u.getId() == idDono)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Usuário com ID " + idDono + " não encontrado."));
-
-        aquarioController.adicionarAquario(nome, volume, tipo, dono);
     }
 
     public List<Aquario> listarAquarios() {
-        return aquarioController.listarAquarios();
+        Command<List<Aquario>> comando = new ListarAquariosCommand(aquarioController);
+        try {
+            return executar(comando);
+        } catch (LoginInvalidoException | SenhaInvalidaException | ArquivoException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public int getQuantidadeUsuarios() {
-        return userController.listarUsuarios().size();
+        return listarUsuarios().size();
     }
 
     public int getQuantidadeAquarios() {
-        return aquarioController.listarAquarios().size();
+        return listarAquarios().size();
     }
 
     public int getQuantidadeTotalEntidades() {
