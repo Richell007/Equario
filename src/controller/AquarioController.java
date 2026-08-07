@@ -5,15 +5,15 @@ import java.util.List;
 import model.Aquario;
 import model.TipoAquario;
 import model.User;
-import service.AquarioService;
+import service.IAquarioService;
 
 public class AquarioController {
-    private final AquarioService service;
+    private final IAquarioService service;
 
-    public AquarioController(AquarioService service) {
+    public AquarioController(IAquarioService service) {
         this.service = service;
     }
-
+    
     public void adicionarAquario(String nome, double volume, TipoAquario tipo, User dono)
             throws ArquivoException {
         service.adicionarAquario(nome, volume, tipo, dono);

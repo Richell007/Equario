@@ -1,7 +1,9 @@
 package service;
 
 import exceptions.ArquivoException;
+import java.util.List;
 import log.Logger;
+import model.Aquario;
 import model.TipoAquario;
 import model.User;
 
@@ -34,4 +36,11 @@ public class AquarioServiceProxy implements IAquarioService {
         this.servicoReal.desfazerUltimaAtualizacaoAquario();
         this.registroDeAtividades.info("Auditoria: Desfazimento concluido com sucesso.");
     }
+
+
+    @Override
+    public List<Aquario> listarTodos() {
+        return this.servicoReal.listarTodos();
+    }
+
 }
