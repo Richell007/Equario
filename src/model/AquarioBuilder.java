@@ -1,26 +1,39 @@
 package model;
 
-public class Aquario {
+public class AquarioBuilder {
     private int id;
     private String nome;
     private double volume;
     private TipoAquario tipo;
     private User dono;
 
-    private Aquario(int id, String nome, double volume, TipoAquario tipo, User dono) {
+    public AquarioBuilder comId(int id) {
         this.id = id;
-        this.nome = nome;
-        this.volume = volume;
-        this.tipo = tipo;
-        this.dono = dono;
+        return this;
     }
 
-    protected Aquario(AquarioBuilder construtor) {
-        this.id = construtor.getId();
-        this.nome = construtor.getNome();
-        this.volume = construtor.getVolume();
-        this.tipo = construtor.getTipo();
-        this.dono = construtor.getDono();
+    public AquarioBuilder comNome(String nome) {
+        this.nome = nome;
+        return this;
+    }
+
+    public AquarioBuilder comVolume(double volume) {
+        this.volume = volume;
+        return this;
+    }
+
+    public AquarioBuilder comTipo(TipoAquario tipo) {
+        this.tipo = tipo;
+        return this;
+    }
+
+    public AquarioBuilder comDono(User dono) {
+        this.dono = dono;
+        return this;
+    }
+
+    public Aquario build() {
+        return new Aquario(this);
     }
 
     public int getId() {

@@ -3,26 +3,35 @@ package service;
 import exceptions.ArquivoException;
 import java.util.List;
 import model.Aquario;
+import model.AquarioBuilder;
 import model.TipoAquario;
 import model.User;
 import repository.IAquarioRepository;
 
-public class AquarioService {
+public class AquarioService implements IAquarioService {
     private final IAquarioRepository repositorio;
 
     public AquarioService(IAquarioRepository repositorio) {
         this.repositorio = repositorio;
     }
 
-    public void adicionarAquario(String nome, double volume, TipoAquario tipo, User dono)
-            throws ArquivoException {
+    @Override
+    public void adicionarAquario(String nome, double volume, TipoAquario tipo, User dono) throws ArquivoException {
         validarNome(nome);
         validarVolume(volume);
         validarTipo(tipo);
         validarDono(dono);
 
         int id = repositorio.gerarProximoId();
-        Aquario novo = new Aquario(id, nome, volume, tipo, dono);
+        
+        Aquario novo = new AquarioBuilder()
+                .comId(id)
+                .comNome(nome)
+                .comVolume(volume)
+                .comTipo(tipo)
+                .comDono(dono)
+                .build();
+                
         repositorio.salvar(novo);
     }
 
