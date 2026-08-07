@@ -10,6 +10,7 @@ import controller.UserController;
 import exceptions.ArquivoException;
 import exceptions.LoginInvalidoException;
 import exceptions.SenhaInvalidaException;
+import java.util.List;
 import model.Aquario;
 import model.User;
 import repository.IAquarioRepository;
@@ -18,8 +19,10 @@ import repository.RepositoryFactory;
 import repository.TipoPersistencia;
 import service.AquarioService;
 import service.UserService;
-
-import java.util.List;
+import service.IAquarioService;
+import service.AquarioServiceProxy;
+import log.Logger;
+import log.JulLoggerAdapter;
 
 public class FacadeSingletonController {
     private static FacadeSingletonController instance;
@@ -33,8 +36,11 @@ public class FacadeSingletonController {
             IAquarioRepository aquarioRepo = RepositoryFactory.criarAquarioRepository(tipoPersistencia);
 
             UserService userService = new UserService(userRepo);
-            AquarioService aquarioService = new AquarioService(aquarioRepo);
 
+            IAquarioService servicoReal = new AquarioService(aquarioRepo);
+            Logger registroDeAtividades = new JulLoggerAdapter("AuditoriaAquarioProxy");
+            IAquarioService aquarioService = new AquarioServiceProxy(servicoReal, registroDeAtividades);
+  
             userController = new UserController(userService);
             aquarioController = new AquarioController(aquarioService);
         } catch (ArquivoException e) {
