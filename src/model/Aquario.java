@@ -1,6 +1,8 @@
 package model;
 
-public class Aquario {
+import java.io.Serializable;
+
+public class Aquario implements Serializable {
     private int id;
     private String nome;
     private double volume;
