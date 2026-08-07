@@ -1,6 +1,8 @@
 import command.AdicionarAquarioCommand;
 import command.AdicionarUsuarioCommand;
+import command.AtualizarAquarioCommand;
 import command.Command;
+import command.DesfazerAtualizacaoAquarioCommand;
 import command.ListarAquariosCommand;
 import command.ListarUsuariosCommand;
 import controller.AquarioController;
@@ -94,6 +96,25 @@ public class FacadeSingletonController {
             executar(comando);
         } catch (LoginInvalidoException | SenhaInvalidaException e) {
             // AdicionarAquarioCommand não lança essas exceções; não deve ocorrer aqui.
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void atualizarAquario(int id, String nome, double volume, String tipoStr)
+            throws ArquivoException, IllegalArgumentException {
+        Command<Void> comando = new AtualizarAquarioCommand(aquarioController, id, nome, volume, tipoStr);
+        try {
+            executar(comando);
+        } catch (LoginInvalidoException | SenhaInvalidaException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void desfazerUltimaAtualizacaoAquario() throws ArquivoException {
+        Command<Void> comando = new DesfazerAtualizacaoAquarioCommand(aquarioController);
+        try {
+            executar(comando);
+        } catch (LoginInvalidoException | SenhaInvalidaException e) {
             throw new RuntimeException(e);
         }
     }

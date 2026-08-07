@@ -7,14 +7,6 @@ public class Aquario {
     private TipoAquario tipo;
     private User dono;
 
-    private Aquario(int id, String nome, double volume, TipoAquario tipo, User dono) {
-        this.id = id;
-        this.nome = nome;
-        this.volume = volume;
-        this.tipo = tipo;
-        this.dono = dono;
-    }
-
     protected Aquario(AquarioBuilder construtor) {
         this.id = construtor.getId();
         this.nome = construtor.getNome();
@@ -41,5 +33,11 @@ public class Aquario {
 
     public User getDono() {
         return dono;
+    }
+
+    @Override
+    public String toString() {
+        return "Aquário [ID: " + id + ", Nome: " + nome + ", Volume: " + volume +
+                "L, Tipo: " + tipo + ", Dono: " + dono.getNome() + "]";
     }
 }
