@@ -1,0 +1,456 @@
+@startuml SistemaEquario
+
+package model {
+    enum TipoAquario {
+        DOCE
+        SALOBRO
+        MARINHO
+    }
+
+    class User implements Serializable {
+        - id: int
+        - nome: String
+        - email: String
+        - login: String
+        - senha: String
+        + getId(): int
+        + getNome(): String
+        + getEmail(): String
+        + getLogin(): String
+        + getSenha(): String
+        + toString(): String
+    }
+
+    class Aquario {
+        - id: int
+        - nome: String
+        - volume: double
+        - tipo: TipoAquario
+        - dono: User
+        + getId(): int
+        + getNome(): String
+        + getVolume(): double
+        + getTipo(): TipoAquario
+        + getDono(): User
+        + toString(): String
+    }
+
+    class AquarioBuilder {
+        - id: int
+        - nome: String
+        - volume: double
+        - tipo: TipoAquario
+        - dono: User
+        + comId(id: int): AquarioBuilder
+        + comNome(nome: String): AquarioBuilder
+        + comVolume(volume: double): AquarioBuilder
+        + comTipo(tipo: TipoAquario): AquarioBuilder
+        + comDono(dono: User): AquarioBuilder
+        + build(): Aquario
+        + getId(): int
+        + getNome(): String
+        + getVolume(): double
+        + getTipo(): TipoAquario
+        + getDono(): User
+    }
+
+    class RegistroAcesso {
+        - usuarioId: int
+        - nomeUsuario: String
+        - dataHora: LocalDateTime
+        + getUsuarioId(): int
+        + getNomeUsuario(): String
+        + getDataHora(): LocalDateTime
+    }
+
+    AquarioBuilder ..> Aquario : cria
+    Aquario --> User : dono
+    Aquario --> TipoAquario
+}
+
+package memento {
+    class AquarioMemento {
+        - estado: Aquario
+        + getEstado(): Aquario
+    }
+
+    class AquarioCaretaker {
+        - ultimoMemento: AquarioMemento
+        + salvar(memento: AquarioMemento): void
+        + recuperar(): AquarioMemento
+        + possuiMemento(): boolean
+        + limpar(): void
+    }
+
+    AquarioCaretaker o--> "0..1" AquarioMemento : ultimoMemento
+    AquarioMemento --> model.Aquario : estado
+}
+
+package exceptions {
+    class ArquivoException extends Exception {
+        + ArquivoException(mensagem: String, causa: Throwable)
+    }
+
+    class LoginInvalidoException extends Exception {
+        + LoginInvalidoException(mensagem: String)
+    }
+
+    class SenhaInvalidaException extends Exception {
+        + SenhaInvalidaException(mensagem: String)
+    }
+}
+
+package log {
+    interface Logger {
+        + info(mensagem: String): void
+        + erro(mensagem: String): void
+        + erro(mensagem: String, causa: Throwable): void
+    }
+
+    class JulLoggerAdapter {
+        - julLogger: java.util.logging.Logger
+        + JulLoggerAdapter(nome: String)
+        + info(mensagem: String): void
+        + erro(mensagem: String): void
+        + erro(mensagem: String, causa: Throwable): void
+    }
+
+    class "java.util.logging.Logger" as JULLogger {
+    }
+
+    JulLoggerAdapter ..|> Logger
+    JulLoggerAdapter o--> JULLogger : julLogger
+}
+
+package repository {
+    enum TipoPersistencia {
+        ARQUIVO
+        MEMORIA
+    }
+
+    interface IAquarioRepository {
+        + salvar(aquario: Aquario): void
+        + atualizar(aquario: Aquario): void
+        + listarTodos(): List<Aquario>
+        + gerarProximoId(): int
+    }
+
+    class AquarioRepository {
+        - ARQUIVO: String
+        - aquarios: List<Aquario>
+        - proximoId: int
+        + AquarioRepository()
+        + salvar(aquario: Aquario): void
+        + atualizar(aquario: Aquario): void
+        + listarTodos(): List<Aquario>
+        + gerarProximoId(): int
+        - carregarDoArquivo(): List<Aquario>
+        - salvarNoArquivo(): void
+    }
+
+    class AquarioRepositoryMemoria {
+        - aquarios: List<Aquario>
+        - proximoId: int
+        + salvar(aquario: Aquario): void
+        + atualizar(aquario: Aquario): void
+        + listarTodos(): List<Aquario>
+        + gerarProximoId(): int
+    }
+
+    interface IUserRepository {
+        + salvar(usuario: User): void
+        + listarTodos(): List<User>
+        + gerarProximoId(): int
+    }
+
+    class UserRepository {
+        - ARQUIVO: String
+        - usuarios: List<User>
+        - proximoId: int
+        + UserRepository()
+        + salvar(usuario: User): void
+        + listarTodos(): List<User>
+        + gerarProximoId(): int
+        - carregarDoArquivo(): List<User>
+        - salvarNoArquivo(): void
+    }
+
+    class UserRepositoryMemoria {
+        - usuarios: List<User>
+        - proximoId: int
+        + salvar(usuario: User): void
+        + listarTodos(): List<User>
+        + gerarProximoId(): int
+    }
+
+    class RepositoryFactory {
+        + {static} criarUserRepository(tipo: TipoPersistencia): IUserRepository
+        + {static} criarAquarioRepository(tipo: TipoPersistencia): IAquarioRepository
+    }
+
+    AquarioRepository ..|> IAquarioRepository
+    AquarioRepositoryMemoria ..|> IAquarioRepository
+    UserRepository ..|> IUserRepository
+    UserRepositoryMemoria ..|> IUserRepository
+
+    RepositoryFactory ..> IAquarioRepository : <<create>>
+    RepositoryFactory ..> IUserRepository : <<create>>
+    RepositoryFactory ..> TipoPersistencia
+
+    IAquarioRepository ..> model.Aquario
+    IUserRepository ..> model.User
+
+    AquarioRepository ..> exceptions.ArquivoException : throws
+    UserRepository ..> exceptions.ArquivoException : throws
+}
+
+package service {
+    interface IAquarioService {
+        + adicionarAquario(nome: String, volume: double, tipo: TipoAquario, dono: User): void throws ArquivoException
+    }
+
+    class AquarioService {
+        - repositorio : IAquarioRepository
+        + AquarioService(repositorio: IAquarioRepository)
+        + adicionarAquario(nome: String, volume: double, tipo: TipoAquario, dono: User): void
+        + listarTodos() : List<Aquario>
+        - validarNome(nome: String) : void
+        - validarVolume(volume: double) : void
+        - validarTipo(tipo: TipoAquario) : void
+        - validarDono(dono: User) : void
+    }
+
+    class AquarioServiceProxy {
+        - servicoReal : IAquarioService
+        - registroDeAtividades : Logger
+        + AquarioServiceProxy(servicoReal: IAquarioService, registroDeAtividades: Logger)
+        + adicionarAquario(nome: String, volume: double, tipo: TipoAquario, dono: User): void
+    }
+
+    class AcessoService {
+        - registros : List<RegistroAcesso>
+        - logger : Logger
+        + AcessoService(logger: Logger)
+        + registrarAcesso(usuario: User) : void
+        + listarRegistros() : List<RegistroAcesso>
+    }
+
+    class UserService {
+        - repositorio : IUserRepository
+        + UserService(repositorio: IUserRepository)
+        + adicionarUsuario(nome: String, email: String, login: String, senha: String) : void
+        + listarTodos() : List<User>
+        - validarLogin(login: String) : void
+        - validarSenha(senha: String, nome: String, email: String) : void
+    }
+
+    AquarioService ..|> IAquarioService
+    AquarioServiceProxy ..|> IAquarioService
+
+    AquarioService --> repository.IAquarioRepository : repositorio
+    AquarioServiceProxy --> IAquarioService : servicoReal
+    AquarioServiceProxy --> log.Logger : registroDeAtividades
+    AcessoService --> log.Logger : logger
+
+    UserService --> repository.IUserRepository : repositorio
+
+    AquarioService ..> model.AquarioBuilder : <<cria>>
+    AquarioService ..> model.Aquario
+    AquarioService ..> model.TipoAquario
+    AquarioService ..> model.User
+    AquarioService ..> exceptions.ArquivoException : throws
+
+    AquarioServiceProxy ..> exceptions.ArquivoException : throws
+    AquarioServiceProxy ..> model.TipoAquario
+    AquarioServiceProxy ..> model.User
+
+    AcessoService "1" --> "*" model.RegistroAcesso : registros
+    AcessoService ..> model.User
+
+    UserService ..> model.User : <<cria>>
+    UserService ..> exceptions.LoginInvalidoException : throws
+    UserService ..> exceptions.SenhaInvalidaException : throws
+    UserService ..> exceptions.ArquivoException : throws
+
+    IAquarioService ..> model.TipoAquario
+    IAquarioService ..> model.User
+    IAquarioService ..> exceptions.ArquivoException : throws
+}
+
+package controller {
+    class AquarioController {
+        - service : AquarioService
+        + AquarioController(service: AquarioService)
+        + adicionarAquario(nome: String, volume: double, tipo: TipoAquario, dono: User): void
+        + listarAquarios() : List<Aquario>
+        + atualizarAquario(id: int, nome: String, volume: double, tipo: TipoAquario) : void
+        + desfazerUltimaAtualizacaoAquario() : void
+    }
+
+    class UserController {
+        - service : UserService
+        + UserController(service: UserService)
+        + adicionarUsuario(nome: String, email: String, login: String, senha: String): void
+        + listarUsuarios() : List<User>
+    }
+
+    AquarioController --> service.AquarioService : service
+    UserController --> service.UserService : service
+
+    AquarioController ..> model.Aquario
+    AquarioController ..> model.TipoAquario
+    AquarioController ..> model.User
+    AquarioController ..> exceptions.ArquivoException : throws
+
+    UserController ..> model.User
+    UserController ..> exceptions.LoginInvalidoException : throws
+    UserController ..> exceptions.SenhaInvalidaException : throws
+    UserController ..> exceptions.ArquivoException : throws
+}
+
+package command {
+    interface "Command<T>" as Command {
+        + execute() : T throws Exception
+    }
+
+    class AdicionarAquarioCommand {
+        - userController : UserController
+        - aquarioController : AquarioController
+        - nome : String
+        - volume : double
+        - tipoStr : String
+        - idDono : int
+        + AdicionarAquarioCommand(userController: UserController, aquarioController: AquarioController, nome: String, volume: double, tipoStr: String, idDono: int)
+        + execute() : Void
+    }
+
+    class AdicionarUsuarioCommand {
+        - userController : UserController
+        - nome : String
+        - email : String
+        - login : String
+        - senha : String
+        + AdicionarUsuarioCommand(userController: UserController, nome: String, email: String, login: String, senha: String)
+        + execute() : Void
+    }
+
+    class AtualizarAquarioCommand {
+        - aquarioController : AquarioController
+        - id : int
+        - nome : String
+        - volume : double
+        - tipoStr : String
+        + AtualizarAquarioCommand(aquarioController: AquarioController, id: int, nome: String, volume: double, tipoStr: String)
+        + execute() : Void
+    }
+
+    class DesfazerAtualizacaoAquarioCommand {
+        - aquarioController : AquarioController
+        + DesfazerAtualizacaoAquarioCommand(aquarioController: AquarioController)
+        + execute() : Void
+    }
+
+    class ListarAquariosCommand {
+        - aquarioController : AquarioController
+        + ListarAquariosCommand(aquarioController: AquarioController)
+        + execute() : List<model.Aquario>
+    }
+
+    class ListarUsuariosCommand {
+        - userController : UserController
+        + ListarUsuariosCommand(userController: UserController)
+        + execute() : List<model.User>
+    }
+
+    ' Realizações (bind implícito pelo nome da classe)
+    AdicionarAquarioCommand ..|> Command
+    AdicionarUsuarioCommand ..|> Command
+    AtualizarAquarioCommand ..|> Command
+    DesfazerAtualizacaoAquarioCommand ..|> Command
+    ListarAquariosCommand ..|> Command
+    ListarUsuariosCommand ..|> Command
+
+    ' Associações diretas (atributos)
+    AdicionarAquarioCommand --> controller.UserController : userController
+    AdicionarAquarioCommand --> controller.AquarioController : aquarioController
+    AdicionarUsuarioCommand --> controller.UserController : userController
+    AtualizarAquarioCommand --> controller.AquarioController : aquarioController
+    DesfazerAtualizacaoAquarioCommand --> controller.AquarioController : aquarioController
+    ListarAquariosCommand --> controller.AquarioController : aquarioController
+    ListarUsuariosCommand --> controller.UserController : userController
+
+    ' Dependências de uso (tipos manipulados internamente)
+    AdicionarAquarioCommand ..> model.TipoAquario : <<converte>>
+    AdicionarAquarioCommand ..> model.User : <<busca dono>>
+    AtualizarAquarioCommand ..> model.TipoAquario : <<converte>>
+    ListarAquariosCommand ..> model.Aquario : <<retorna>>
+    ListarUsuariosCommand ..> model.User : <<retorna>>
+}
+
+package facade {
+    class FacadeSingletonController {
+        - {static} instance : FacadeSingletonController
+        - userController : UserController
+        - aquarioController : AquarioController
+        - FacadeSingletonController(tipoPersistencia: TipoPersistencia)
+        + {static} getInstance(tipoPersistencia: TipoPersistencia) : FacadeSingletonController
+        + {static} getInstance() : FacadeSingletonController
+        - executar<T>(command: Command<T>) : T
+        + adicionarUsuario(nome: String, email: String, login: String, senha: String) : void
+        + listarUsuarios() : List<User>
+        + adicionarAquario(nome: String, volume: double, tipoStr: String, idDono: int) : void
+        + atualizarAquario(id: int, nome: String, volume: double, tipoStr: String) : void
+        + desfazerUltimaAtualizacaoAquario() : void
+        + listarAquarios() : List<Aquario>
+        + getQuantidadeUsuarios() : int
+        + getQuantidadeAquarios() : int
+        + getQuantidadeTotalEntidades() : int
+    }
+
+    FacadeSingletonController --> controller.UserController : userController
+    FacadeSingletonController --> controller.AquarioController : aquarioController
+
+    FacadeSingletonController ..> command.AdicionarUsuarioCommand : <<cria>>
+    FacadeSingletonController ..> command.ListarUsuariosCommand : <<cria>>
+    FacadeSingletonController ..> command.AdicionarAquarioCommand : <<cria>>
+    FacadeSingletonController ..> command.AtualizarAquarioCommand : <<cria>>
+    FacadeSingletonController ..> command.DesfazerAtualizacaoAquarioCommand : <<cria>>
+    FacadeSingletonController ..> command.ListarAquariosCommand : <<cria>>
+
+    FacadeSingletonController ..> command.Command : usa
+    FacadeSingletonController ..> repository.RepositoryFactory : usa (inicialização)
+    FacadeSingletonController ..> repository.TipoPersistencia : parâmetro
+    FacadeSingletonController ..> repository.IAquarioRepository : <<cria via factory>>
+    FacadeSingletonController ..> repository.IUserRepository : <<cria via factory>>
+    FacadeSingletonController ..> service.AquarioService : <<cria>>
+    FacadeSingletonController ..> service.UserService : <<cria>>
+    FacadeSingletonController ..> exceptions.ArquivoException : throws / captura
+    FacadeSingletonController ..> exceptions.LoginInvalidoException : throws
+    FacadeSingletonController ..> exceptions.SenhaInvalidaException : throws
+    FacadeSingletonController ..> model.User : retorno
+    FacadeSingletonController ..> model.Aquario : retorno
+}
+
+package main {
+    class Main {
+        + {static} main(args: String[]) : void
+        - {static} escolherTipoPersistencia(scanner: Scanner) : TipoPersistencia
+        - {static} adicionarUsuario(scanner: Scanner, fachada: FacadeSingletonController) : void
+        - {static} listarUsuarios(fachada: FacadeSingletonController) : void
+        - {static} adicionarAquario(scanner: Scanner, fachada: FacadeSingletonController) : void
+        - {static} listarAquarios(fachada: FacadeSingletonController) : void
+        - {static} atualizarAquario(scanner: Scanner, fachada: FacadeSingletonController) : void
+        - {static} desfazerAtualizacaoAquario(fachada: FacadeSingletonController) : void
+        - {static} mostrarQuantidades(fachada: FacadeSingletonController) : void
+    }
+
+    Main ..> facade.FacadeSingletonController : <<usa>>
+    Main ..> repository.TipoPersistencia : <<usa>>
+    Main ..> model.Aquario : <<manipula>>
+    Main ..> model.User : <<manipula>>
+    Main ..> exceptions.ArquivoException : <<captura>>
+    Main ..> exceptions.LoginInvalidoException : <<captura>>
+    Main ..> exceptions.SenhaInvalidaException : <<captura>>
+}
+
+@enduml
