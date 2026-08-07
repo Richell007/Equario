@@ -16,8 +16,7 @@ public class AquarioService implements IAquarioService {
     }
 
     @Override
-    public void adicionarAquario(String nome, double volume, TipoAquario tipo, User dono)
-            throws ArquivoException {
+    public void adicionarAquario(String nome, double volume, TipoAquario tipo, User dono) throws ArquivoException {
         validarNome(nome);
         validarVolume(volume);
         validarTipo(tipo);
